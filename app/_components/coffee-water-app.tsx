@@ -33,14 +33,14 @@ export function CoffeeWaterApp() {
     <div className="min-h-screen flex flex-col">
       <header className="sticky top-0 z-50 bg-lm-bg/90 backdrop-blur-md border-b border-lm-border">
         <div className="max-w-5xl mx-auto px-5 sm:px-6">
-          <div className="flex items-center justify-between gap-4 py-4">
-            <div className="min-w-0">
+          <div className="flex flex-col gap-3 py-3 sm:flex-row sm:items-end sm:justify-between sm:gap-4 sm:py-4">
+            <div className="min-w-0 shrink-0">
               <a href="/">
-              <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.25em] text-lm-muted mb-1">
-                <span>Pug Coffee</span>
-                {/* <span className="text-lm-border">×</span>
+                <div className="flex items-center gap-2 text-[9px] uppercase tracking-[0.25em] text-lm-muted mb-1">
+                  <span>Pug Coffee</span>
+                  {/* <span className="text-lm-border">×</span>
                 <span>Fear of God</span> */}
-              </div>
+                </div>
                 <h1 className="font-display text-2xl sm:text-3xl font-medium tracking-tight text-lm-ink leading-none">
                   Water Calculator
                 </h1>
@@ -48,14 +48,14 @@ export function CoffeeWaterApp() {
             </div>
             <nav
               aria-label="Application sections"
-              className="flex gap-5 sm:gap-6 shrink-0"
+              className="grid grid-cols-2 gap-x-3 gap-y-2 pb-px min-[400px]:flex min-[400px]:flex-nowrap min-[400px]:gap-4 sm:w-auto sm:gap-6"
               role="tablist"
             >
               {TABS.map((tab) => (
                 <button
                   aria-controls={`${tab.id}-panel`}
                   aria-selected={activeTab === tab.id}
-                  className={`transition-colors ${activeTab === tab.id ? "text-lm-ink lm-tab-active" : "text-lm-muted hover:text-lm-ink"}`}
+                  className={`whitespace-nowrap transition-colors ${activeTab === tab.id ? "text-lm-ink lm-tab-active" : "text-lm-muted hover:text-lm-ink"}`}
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   role="tab"
