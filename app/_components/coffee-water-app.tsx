@@ -7,11 +7,15 @@ import {
   CUSTOM_GH_LIMITS,
   CUSTOM_KH_LIMITS,
   DEFAULT_RECIPE_ID,
+  DEFAULT_TEA_RECIPE_ID,
   DEFAULT_VOLUME_LITERS,
   formatLiters,
   getRecipe,
+  getTeaRecipe,
   RECIPES,
   RECIPE_BRANDS,
+  TEA_RECIPES,
+  TEA_RECIPE_BRANDS,
   PUBLISHED_COMPETITION_RECIPES,
   VOLUME_LIMITS,
   VOLUME_PRESETS,
@@ -100,9 +104,11 @@ function Calculator() {
   const [recipeId, setRecipeId] = useState(DEFAULT_RECIPE_ID);
   const [customGh, setCustomGh] = useState(60);
   const [customKh, setCustomKh] = useState(25);
-  const recipe = getRecipe(recipeId);
-  const gh = recipe.id === "custom" ? customGh : recipe.gh;
-  const kh = recipe.id === "custom" ? customKh : recipe.kh;
+  const [profileType, setProfileType] = useState<"coffee" | "tea">("coffee");
+  const isTea = profileType === "tea";
+  const recipe = isTea ? getTeaRecipe(recipeId) : getRecipe(recipeId);
+  const gh = recipe.id === "custom" || recipe.id === "tea-custom" ? customGh : recipe.gh;
+  const kh = recipe.id === "custom" || recipe.id === "tea-custom" ? customKh : recipe.kh;
   const amounts = calculateMineralAmounts(volume, gh, kh);
   const updateVolume = (value: number) => {
     const next = clamp(value, VOLUME_LIMITS);
@@ -171,21 +177,42 @@ function Calculator() {
           </div>
           <div>
             <SectionLabel className="mb-2">Profile</SectionLabel>
+            <div
+              aria-label="Profile type"
+              className="inline-flex border border-lm-border mb-2"
+              role="radiogroup"
+            >
+              {(["coffee", "tea"] as const).map((type) => (
+                <button
+                  aria-checked={profileType === type}
+                  className={`px-3 py-1.5 text-[10px] uppercase tracking-[0.12em] font-medium transition-colors ${profileType === type ? "bg-lm-ink text-lm-surface" : "text-lm-muted hover:text-lm-ink"}`}
+                  key={type}
+                  onClick={() => {
+                    setProfileType(type);
+                    setRecipeId(type === "tea" ? DEFAULT_TEA_RECIPE_ID : DEFAULT_RECIPE_ID);
+                  }}
+                  role="radio"
+                  type="button"
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
             <select
               aria-label="Water profile"
               className="lm-select w-full bg-lm-surface border border-lm-border px-3 py-2.5 text-sm text-lm-ink focus:outline-none focus:border-lm-ink transition-colors appearance-none cursor-pointer"
               onChange={(event) => setRecipeId(event.target.value)}
               value={recipeId}
             >
-              {RECIPE_BRANDS.map((brand) => (
+              {(isTea ? TEA_RECIPE_BRANDS : RECIPE_BRANDS).map((brand) => (
                 <optgroup key={brand} label={brand}>
-                  {RECIPES.filter((entry) => entry.brand === brand).map(
-                    (entry) => (
+                  {(isTea ? TEA_RECIPES : RECIPES)
+                    .filter((entry) => entry.brand === brand)
+                    .map((entry) => (
                       <option key={entry.id} value={entry.id}>
                         {entry.name} — {entry.gh}/{entry.kh}
                       </option>
-                    ),
-                  )}
+                    ))}
                 </optgroup>
               ))}
             </select>
@@ -194,7 +221,7 @@ function Calculator() {
             </p>
           </div>
         </div>
-        {recipeId === "custom" && (
+        {(recipeId === "custom" || recipeId === "tea-custom") && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-lm-surface border border-lm-border">
             <RangeControl
               label="GH"

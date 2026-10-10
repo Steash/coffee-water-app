@@ -1,6 +1,9 @@
 export const RECIPE_BRANDS = ["Lotus Water", "Apax Lab", "Custom"] as const;
 export type RecipeBrand = (typeof RECIPE_BRANDS)[number];
 
+export const TEA_RECIPE_BRANDS = ["Tea", "Custom"] as const;
+export type TeaRecipeBrand = (typeof TEA_RECIPE_BRANDS)[number];
+
 export interface Recipe {
   readonly id: string;
   readonly brand: RecipeBrand;
@@ -157,6 +160,137 @@ export const RECIPES = [
       "Define your own custom General Hardness (GH) and Alkalinity (KH) targets.",
   },
 ] as const satisfies readonly Recipe[];
+
+export interface TeaRecipe {
+  readonly id: string;
+  readonly brand: TeaRecipeBrand;
+  readonly name: string;
+  readonly gh: number;
+  readonly kh: number;
+  readonly description: string;
+}
+
+export const DEFAULT_TEA_RECIPE_ID = "tea-green";
+
+// Tea water targets follow the Chinese six-category tradition (绿茶 green, 白茶
+// white, 黄茶 yellow, 青茶/乌龙 oolong, 红茶 black, 黑茶 dark). Peer-reviewed work
+// from the Tea Research Institute of the Chinese Academy of Agricultural
+// Sciences (Hangzhou) and Anhui Agricultural University is the source of truth
+// for the direction these values take:
+//
+//   * Lower-TDS / low-mineral water brews better tea for sensory quality and
+//     antioxidant retention (Xu et al. 2017, Food Chem. 236:142; Cao et al.
+//     2021, Food Chem. 364:130235).
+//   * Sensitivity to hard, high-pH, high-TDS water ranks: Japanese + Chinese
+//     green most sensitive → white/yellow → light oolong → rock/roasted oolong
+//     and sheng pu-erh → black red tea → shou/dark pu-erh most stable (Cao et
+//     al. 2021; Deng et al. 2023, Food Chem. 419:136079).
+//   * Higher pH + TDS darkens infusions and turns them flatter/astringent via
+//     oxidative polymerization of catechins; pure water resists this best
+//     (Cao et al. 2021; Deng et al. 2023).
+//   * Calcium/iron in water suppress volatile (aromatic) compounds; neutral pH
+//     and low mineral content suit green tea (Bai et al. 2023, Food Chem. X
+//     18:100681).
+//
+// The specific GH/KH numbers below are practical starting presets derived from
+// these principles rather than exact optima published in the papers: the
+// research establishes low mineral + low carbonate (buffer), not per-tea ppm
+// Tradeoff: buffer here stays minimal so delicate teas never taste
+// flat, and hardness scales up only along the oxidation/fermentation/roast
+// gradient. Finer splits (Japanese vs Chinese green, light vs rock oolong,
+// sheng vs shou pu-erh) follow the same low→high ordering within each family.
+export const TEA_RECIPES = [
+  {
+    id: "tea-green",
+    brand: "Tea",
+    name: "Chinese Green — 绿茶",
+    gh: 20,
+    kh: 10,
+    description:
+      "The most water-sensitive tea: soft, low mineral, low buffer. Preserves fresh, grassy-vegetal sweetness and aroma.",
+  },
+  {
+    id: "tea-japanese-green",
+    brand: "Tea",
+    name: "Japanese Green — 煎茶/玉露",
+    gh: 15,
+    kh: 8,
+    description:
+      "Sencha and gyokuro prize clean umami; use the softest, lowest-buffer water so sweet-savory depth isn't masked.",
+  },
+  {
+    id: "tea-white",
+    brand: "Tea",
+    name: "White Tea — 白茶",
+    gh: 15,
+    kh: 8,
+    description:
+      "Softest water of any category; lets delicate floral, honey and downy notes come through untouched.",
+  },
+  {
+    id: "tea-yellow",
+    brand: "Tea",
+    name: "Yellow Tea — 黄茶",
+    gh: 20,
+    kh: 10,
+    description:
+      "Rare, lightly-oxidized tea between green and white; keep water near-neutral and low-mineral like green tea.",
+  },
+  {
+    id: "tea-oolong-light",
+    brand: "Tea",
+    name: "Light Oolong — 清香型乌龙",
+    gh: 25,
+    kh: 12,
+    description:
+      "Fragrant, crisp high-mountain (gaoshan) and floral oolongs; low mineral keeps the aroma bright and transparent.",
+  },
+  {
+    id: "tea-oolong-dark",
+    brand: "Tea",
+    name: "Rock / Roasted Oolong — 岩茶/浓香",
+    gh: 35,
+    kh: 18,
+    description:
+      "Wuyi yancha and heavily roasted oolongs: a touch more mineral rounds out toasty, mineral-driven body.",
+  },
+  {
+    id: "tea-black",
+    brand: "Tea",
+    name: "Black Tea — 红茶",
+    gh: 40,
+    kh: 25,
+    description:
+      "Most tolerant of the lighter teas: moderate mineral and low-moderate buffer round out malty, full-bodied red tea.",
+  },
+  {
+    id: "tea-puerh-sheng",
+    brand: "Tea",
+    name: "Sheng Pu-erh — 生普洱",
+    gh: 35,
+    kh: 18,
+    description:
+      "Raw, aged pu-erh brews bright and aromatic; keep mineral moderate so bitterness stays in check.",
+  },
+  {
+    id: "tea-puerh-shou",
+    brand: "Tea",
+    name: "Shou Pu-erh — 熟普洱",
+    gh: 50,
+    kh: 30,
+    description:
+      "Ripe/fermented pu-erh is the most water-stable brew; higher mineral brings out thick, earthy, woody body.",
+  },
+  {
+    id: "tea-custom",
+    brand: "Custom",
+    name: "Custom Tea Profile",
+    gh: 20,
+    kh: 10,
+    description:
+      "Define your own custom General Hardness (GH) and Alkalinity (KH) targets for tea.",
+  },
+] as const satisfies readonly TeaRecipe[];
 
 // Values are transcribed from each finalist's published routine. When mineral
 // doses are not published, retain the reported water target without inference.
@@ -336,6 +470,10 @@ export function clamp(value: number, limits: { min: number; max: number }) {
 
 export function getRecipe(recipeId: string) {
   return RECIPES.find((recipe) => recipe.id === recipeId) ?? RECIPES[0];
+}
+
+export function getTeaRecipe(recipeId: string) {
+  return TEA_RECIPES.find((recipe) => recipe.id === recipeId) ?? TEA_RECIPES[0];
 }
 
 export function calculateMineralAmounts(
